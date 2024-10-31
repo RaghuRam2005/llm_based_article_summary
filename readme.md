@@ -31,7 +31,7 @@ Note: ONLY use the packages provided in the requirements.txt file (similar/alter
 ### Step 1: Clone or download the Repository (if emailed)
 
 ```bash
-git clone https://github.com/your-repo-url.git
+git clone https://github.com/RaghuRam2005/llm_based_search.git
 cd project_name
 ```
 
