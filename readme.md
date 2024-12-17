@@ -28,7 +28,7 @@ Note: ONLY use the packages provided in the requirements.txt file (similar/alter
 
 ## Setup Instructions
 
-### Step 1: Clone or download the Repository (if emailed)
+### Step 1: Clone or download the Repository
 
 ```bash
 git clone https://github.com/RaghuRam2005/llm_based_search.git
