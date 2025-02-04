@@ -31,57 +31,25 @@ This project is designed to create a Retrieval-Augmented Generation (RAG) system
 
 ```bash
 git clone https://github.com/RaghuRam2005/llm_based_search.git
-cd project_name
+cd llm_based_search
 ```
 
 Or download it
 
-### Step 2: Set Up a Virtual Environment
+### Step 2: Setup the API key:
+Go to google AI studio and generate API key and create a `.env` file in `flask_app` folder.
+Note: This API key are not free and are charged based on the usages
 
-You can use `venv` or `conda` to create an isolated environment for this project.
-
-#### Using `venv`
-
+### Step 3: Running the application:
+Now in `llm_based_search` run the following commands to start and run the Application:
 ```bash
-python -m venv env
-source env/bin/activate  # On Windows, use `env\Scripts\activate`
+chmod +x run_app.sh
+```
+and then run:
+```bash
+./run_app.sh
 ```
 
-#### Using `conda`
-
-```bash
-conda create --name project_env python=3.8
-conda activate project_env
-```
-
-### Step 3: Install Requirements
-
-```bash
-pip install -r requirements.txt
-```
-
-### Step 4: Set Up Environment Variables
-
-Create a `.env` file in the root directory and add your gemini API keys in a way it can be accessed in the app.
-
-
-### Step 5: Run the Flask Backend
-
-Navigate to the `flask_app` directory and start the Flask server:
-
-```bash
-cd flask_app
-python app.py
-```
-
-### Step 6: Run the Streamlit Frontend
-
-In a new terminal, run the Streamlit app:
-
-```bash
-cd streamlit_app
-streamlit run app.py
-```
 
 ### Step 7: Open the Application
 
