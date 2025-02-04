@@ -2,56 +2,165 @@ import os
 import requests
 from bs4 import BeautifulSoup
 from dotenv import load_dotenv
-import openai
 from googlesearch import search
+import google.generativeai as genai
+from urllib.parse import urlparse
+import urllib3
+
+# Disables SSL warnings
+urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 # Load API keys from environment variables
 load_dotenv()
-OPENAI_API_KEY = os.getenv('OPENAI_API')
-openai.api_key = OPENAI_API_KEY
+GEMINI_API = os.getenv("GEMINI")
+genai.configure(api_key=GEMINI_API)
+
+def is_valid_url(url):
+    """
+    checks if URL is likely to contain valid content
+
+    Args:
+        url (str): The URL of the website to check
+
+    Returns:
+        bool: True, if URL is valid and False, if the URL is not valid
+    """
+    parsed = urlparse(url)
+    path = parsed.path.lower()
+    query = parsed.query.lower()
+
+    # Common patterns in error pages
+    invalid_patterns = [
+        '/search', 'search=', 'results',
+        'error', '404', 'notfound', 'redirect'
+    ]
+
+    # check path and query parameters
+    if any(pattern in path or pattern in query for pattern in invalid_patterns):
+        return False
+    
+    # if the path is too low (eg:homepage)
+    if len(path.split('/')) < 3:
+        return False
+        
+    return True
+
 
 def search_articles(query):
     """
-    Searches Google for articles related to the query and returns a list of articles.
+    Searches Google for articles related to the query and returns a list of articles
+
+    Args:
+        query (str): User queried topic
+
+    Returns:
+        list : contains list or valid URL's
     """
     articles = []
-    results = search(query, advanced=True, num_results=10)
+    headers = {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3'
+    }
+    try:
+        results = search(query, advanced=True, num_results=15)
+    except Exception as e:
+        print(f"Google search failed: {e}")
+        return []
+    
     for result in results:
-        articles.append(result.url)
-    return articles
+        try:
+            # Use HEAD request first to check status without downloading body
+            response = requests.head(
+                result.url, 
+                headers=headers, 
+                timeout=10, 
+                allow_redirects=True,
+                verify=False  # SSL verification disabled
+            )
+            
+            # Check final URL after redirects
+            final_url = response.url
+            
+            if (response.status_code == 200 
+                and is_valid_url(final_url)
+                and final_url not in articles):
+                
+                # Optional: Verify with GET request for content validation
+                content_response = requests.get(
+                    final_url,
+                    headers=headers,
+                    timeout=15,
+                    verify=False
+                )
+                
+                # Basic content validation
+                if content_response.status_code == 200:
+                    articles.append(final_url)
+                    
+        except requests.exceptions.RequestException:
+            continue
+        except KeyboardInterrupt:
+            break
+            
+    return articles[:10]
+
+
+def scrape_article_content(url):
+    headers = {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3'
+    }
+    try:
+        # Fetch the HTML content
+        response = requests.get(url, headers=headers, timeout=10)
+        response.raise_for_status()  # Raise an error for bad status codes
+        
+        # Parse the HTML using BeautifulSoup
+        soup = BeautifulSoup(response.text, 'html.parser')
+        
+        # Extract text from common article tags (e.g., <p>, <h1>, <h2>, etc.)
+        article_text = ""
+        for tag in soup.find_all(['p', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6']):
+            article_text += tag.get_text(strip=True) + " "
+        
+        return article_text.strip()  # Remove leading/trailing spaces
+    except requests.exceptions.RequestException as e:
+        print(f"Failed to scrape {url}: {e}")
+        return ""
 
 def concatenate_content(articles):
     """
-    Concatenates the content of the provided articles into a single string.
+    concatenates the text from 'scrape_article_content' function
+
+    Args:
+        articles (list): contains the list of URL's
+
+    Returns:
+        str : concatenated text from the websites
     """
-    full_text = ""
-    try:
-        for article in articles:
-            response = requests.get(article)
-            response.raise_for_status()
-            soup = BeautifulSoup(response.content, 'html.parser')
-            title = soup.find('title').text.strip()
-            snippet = soup.find('p').text.strip()
-            full_text += title+":"+snippet+"."
-        return full_text[:150]
-    except Exception as e:
-        return str(e)
+    # Scrape content from each URL
+    all_content = ""
+    for article in articles:
+        print(f"Scraping: {article}")
+        article_content = scrape_article_content(article)
+        if article_content:
+            all_content += article_content + "\n\n"  # Add spacing between articles
+        
+    return all_content.strip()
 
 def generate_answer(content, query):
     """
     Generates an answer from the concatenated content using GPT-4.
     The content and the user's query are used to generate a contextual answer.
     """
-    prompt = f""" use the context: {content} and answer the query: {query}"""
+    prompt = f""" Summarize this {content[:500]},  using the query {query} in 50 to 80 words"""
     try:
-        response = openai.completions.create(
-            model="gpt-3.5-turbo",
-            prompt=prompt,
-            max_tokens=500,
-            temperature=0.7,
-        )
-        answer = response['choices'][0]['text']
-        return answer
+        model = genai.GenerativeModel("gemini-1.5-flash")
+        answer = model.generate_content(prompt, 
+                        generation_config=genai.GenerationConfig(
+                            max_output_tokens=100
+                        )
+                    )
+        return answer.text
     except Exception as e:
         print(e)
         return None
+
