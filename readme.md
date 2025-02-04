@@ -4,7 +4,6 @@
 ## Overview
 
 This project is designed to create a Retrieval-Augmented Generation (RAG) system using a Large Language Model (LLM). The system integrates with an API to scrape content from the internet and uses an API to serve the LLM-generated answers. A simple front-end interface is provided to interact with the system. 
-Note: ONLY use the packages provided in the requirements.txt file (similar/alternative packages are ok only if they perform similar task/function). 
 
 ## Process Overview
 
@@ -63,7 +62,7 @@ pip install -r requirements.txt
 
 ### Step 4: Set Up Environment Variables
 
-Create a `.env` file in the root directory and add your API keys in a way it can be accessed in the app.
+Create a `.env` file in the root directory and add your gemini API keys in a way it can be accessed in the app.
 
 
 ### Step 5: Run the Flask Backend
