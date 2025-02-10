@@ -1,17 +1,10 @@
 import streamlit as st
 import requests
 
-st.title("LLM-based RAG Search")
-
-if "messages" not in st.session_state:
-    st.session_state.messages = []
-
-for message in st.session_state.messages:
-    with st.chat_message(message["role"]):
-        st.markdown(message["content"])
+st.title("LLM based article summary")
 
 # Input for user query
-query = st.chat_input("Enter the query: ")
+query = st.chat_input("Enter the article name you want to search: ")
 
 if len(str(query)) > 30:
     st.warning("Query length limit exceeded!")
