@@ -18,13 +18,24 @@ if len(str(query)) > 30:
     st.warning("Query length limit exceeded!")
 
 if query:
+    try:
+        history = st.session_state.messages[-2:]
+    except Exception:
+        history = {}
+
     # Make a POST request to the Flask API
     with st.chat_message("user"):
         st.markdown(query)
-        st.session_state.messages.append({"role":"user", 'content':query})
+    
+    st.session_state.messages.append({"role":"user", 'content':query})
+    
+    payload = {
+        "query" : query,
+        "history" : history
+    }
     
     flask_url = "http://localhost:5001/query"
-    response = requests.post(flask_url, json={"query": query})
+    response = requests.post(flask_url, json=payload)
 
     if response.status_code == 200:
         with st.chat_message("assistant"):
