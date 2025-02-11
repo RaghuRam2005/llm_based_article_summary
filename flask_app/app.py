@@ -23,8 +23,8 @@ def query():
     print(f"Recevied History: {history}")
     
     print("Step 1: Searching articles")
-    user_query = str(user_query)
-    articles = utils.search_articles(query=user_query)
+    query = str(query)
+    articles = utils.search_articles(query=query)
     if not articles:
         return jsonify({'error': 'No articles found'}), 404
 
@@ -35,7 +35,7 @@ def query():
     
 
     print("Step 3: Generating answer")
-    response = utils.generate_answer(content=content, query=query)
+    response = utils.generate_answer(content=content, query=query, history=history)
     if not response:
         return jsonify({'error': 'Failed to generate a response'}), 500    
 
