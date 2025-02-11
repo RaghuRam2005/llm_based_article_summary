@@ -146,17 +146,22 @@ def concatenate_content(articles):
         
     return all_content.strip()
 
-def generate_answer(content, query):
+def generate_answer(content, query, history):
     """
     Generates an answer from the concatenated content using GPT-4.
     The content and the user's query are used to generate a contextual answer.
     """
-    prompt = f""" Summarize this {content},  using the query {query} in 200 words and give it in markdown format"""
+    if history:
+        history_prompt = "\n".join([f"{msg['role']}: {msg['content']}" for msg in history])
+    else:
+        history_prompt = None
+    prompt = f"""Previous conversation:\n{history_prompt}\n\nSummarize this {content},  
+    using the query {query} in 80 words and give it in markdown format"""
     try:
         model = genai.GenerativeModel("gemini-1.5-flash")
         answer = model.generate_content(prompt, 
                         generation_config=genai.GenerationConfig(
-                            max_output_tokens=200
+                            max_output_tokens=100
                         )
                     )
         return answer.text
