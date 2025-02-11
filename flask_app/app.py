@@ -17,8 +17,10 @@ def query():
     if not data or 'query' not in data:
         return jsonify({'error': 'No query provided'}), 400
 
-    user_query = data['query']
-    print(f"Received query: {user_query}")
+    query = data['query']
+    history = data.get("history", [])
+    print(f"Received query: {query}")
+    print(f"Recevied History: {history}")
     
     print("Step 1: Searching articles")
     user_query = str(user_query)
@@ -33,7 +35,7 @@ def query():
     
 
     print("Step 3: Generating answer")
-    response = utils.generate_answer(content=content, query=user_query)
+    response = utils.generate_answer(content=content, query=query)
     if not response:
         return jsonify({'error': 'Failed to generate a response'}), 500    
 
