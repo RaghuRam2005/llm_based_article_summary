@@ -151,12 +151,12 @@ def generate_answer(content, query):
     Generates an answer from the concatenated content using GPT-4.
     The content and the user's query are used to generate a contextual answer.
     """
-    prompt = f""" Summarize this {content[:500]},  using the query {query} in 50 to 80 words"""
+    prompt = f""" Summarize this {content},  using the query {query} in 200 words and give it in markdown format"""
     try:
         model = genai.GenerativeModel("gemini-1.5-flash")
         answer = model.generate_content(prompt, 
                         generation_config=genai.GenerationConfig(
-                            max_output_tokens=100
+                            max_output_tokens=200
                         )
                     )
         return answer.text
