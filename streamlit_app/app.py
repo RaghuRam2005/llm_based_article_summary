@@ -7,6 +7,7 @@ st.title("LLM based article summary")
 if "messages" not in st.session_state:
     st.session_state.messages = []
 
+# Load chat history into chat
 for message in st.session_state.messages:
     with st.chat_message(message['role']):
         st.markdown(message['content'])
