@@ -5,3 +5,4 @@ streamlit
 googlesearch-python
 google-generativeai
 beautifulsoup4
+sentence-transformers

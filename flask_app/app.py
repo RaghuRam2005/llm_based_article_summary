@@ -41,5 +41,20 @@ def query():
 
     return jsonify({'response': response})
 
+@app.route("/embed")
+def get_embed():
+    data = request.json
+    data = data['query']
+    embedding = utils.get_embeddings(data)
+    return jsonify({'embedding':embedding})
+
+@app.route("/check")
+def is_same():
+    data = request.json
+    query_embed = data['query']
+    other_embed = data['embedding']
+    check = utils.is_similar(query_embed, other_embed)
+    return jsonify({'similar':check})
+
 if __name__ == '__main__':
     app.run(host='localhost', port=5001, debug="enable")

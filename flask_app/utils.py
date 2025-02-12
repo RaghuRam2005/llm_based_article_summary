@@ -5,6 +5,7 @@ from dotenv import load_dotenv
 from googlesearch import search
 import google.generativeai as genai
 from urllib.parse import urlparse
+from sentence_transformers import SentenceTransformer, util
 import urllib3
 
 # Disables SSL warnings
@@ -14,6 +15,19 @@ urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 load_dotenv()
 GEMINI_API = os.getenv("GEMINI")
 genai.configure(api_key=GEMINI_API)
+
+def get_embeddings(query):
+    model = SentenceTransformer('all-MiniLM-L6-v2')
+    embedding = model.encode(query, conver_to_tensor=True)
+    return embedding
+
+def is_similar(query_embed, other_embed):
+    cosine_sim = util.cos_sim(query_embed, other_embed)
+    threshold = 0.8
+    if cosine_sim > threshold:
+        return True
+    else:
+        return False
 
 def is_valid_url(url):
     """
@@ -169,3 +183,7 @@ def generate_answer(content, query, history):
         print(e)
         return None
 
+if __name__ == "__main__":
+    query = "what is machine learning"
+    embed = get_embeddings(query)
+    print(embed)
