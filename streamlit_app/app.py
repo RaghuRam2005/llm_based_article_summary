@@ -1,5 +1,6 @@
 import streamlit as st
 import requests
+import numpy as np
 
 st.title("LLM based article summary")
 
@@ -36,16 +37,17 @@ if query:
 
     embed_url = "http://localhost:5001/embed"
     embeddings = requests.post(embed_url, json=payload)
-    embeddings = embeddings.json()['embedding']
+    embeddings = np.array(embeddings.json()['embedding'])
 
     is_similar = False
     ans_index = None
     check_url = "http://localhost:5001/check"
 
     for index in range(len(st.session_state.messages)):
-        query_embed = {'embedding':st.session_state.messages[index]['embed'], 'query':embeddings}
+        query_embed = {'embedding':st.session_state.messages[index]['embed'].tolist(), 'query':embeddings.tolist()}
         check = requests.post(check_url, json=query_embed)
-        check = check.json
+        check = check.json()
+
         if check['similar']:
             is_similar=True
             ans_index = index
@@ -65,7 +67,8 @@ if query:
         if response.status_code == 200:
             answer = response.json()['answer']
         else:
-            answer = "An Error occured"
+            answer = response.json()['answer']
+        history = query
         st.session_state.messages.append({
             'user':query,
             'assistant': answer,

@@ -17,11 +17,31 @@ GEMINI_API = os.getenv("GEMINI")
 genai.configure(api_key=GEMINI_API)
 
 def get_embeddings(query):
+    """
+    Generate the word embeddings for query using a pretrained model
+
+    Args:
+        query (str): this is the input given by user
+
+    Returns:
+        list: list of word embedding values for the given query
+    """
     model = SentenceTransformer('all-MiniLM-L6-v2')
     embedding = model.encode(query, conver_to_tensor=True)
     return embedding
 
 def is_similar(query_embed, other_embed):
+    """
+    checks if the given two word embeddings are similar or not
+    using cosine similarity function
+
+    Args:
+        query_embed (list): query given by the user
+        other_embed (list): embedding history stored in cache
+
+    Returns:
+        _type_: returns True if both are similar False otherwise
+    """
     cosine_sim = util.cos_sim(query_embed, other_embed)
     threshold = 0.8
     if cosine_sim > threshold:
@@ -166,7 +186,7 @@ def generate_answer(content, query, history):
     The content and the user's query are used to generate a contextual answer.
     """
     if history:
-        history_prompt = "\n".join([f"{msg['role']}: {msg['content']}" for msg in history])
+        history_prompt = " ".join(msg for msg in history)
     else:
         history_prompt = None
     prompt = f"""Previous conversation:\n{history_prompt}\n\nSummarize this {content},  
@@ -183,7 +203,11 @@ def generate_answer(content, query, history):
         print(e)
         return None
 
-if __name__ == "__main__":
-    query = "what is machine learning"
-    embed = get_embeddings(query)
-    print(embed)
+#if __name__ == "__main__":
+#    query = "what is machine learning"
+#    embed = get_embeddings(query)
+#    print(embed)
+#    other_query = "Explain about machine learning"
+#    other_embed = get_embeddings(other_query)
+#    check = is_similar(embed, other_embed)
+#    print(check)
