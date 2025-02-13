@@ -189,13 +189,16 @@ def generate_answer(content, query, history):
         history_prompt = " ".join(msg for msg in history)
     else:
         history_prompt = None
-    prompt = f"""Previous conversation:\n{history_prompt}\n\nSummarize this {content},  
-    using the query {query} in 80 words and give it in markdown format"""
+    prompt = f"""Previous conversation:\n{history_prompt}\n\nSummarize this {content} in around 100 words,  
+    using the query {query}"""
+    print(len(prompt))
     try:
         model = genai.GenerativeModel("gemini-1.5-flash")
         answer = model.generate_content(prompt, 
                         generation_config=genai.GenerationConfig(
-                            max_output_tokens=100
+                            max_output_tokens=200,
+                            top_p=0.8,
+                            temperature=0.5
                         )
                     )
         return answer.text

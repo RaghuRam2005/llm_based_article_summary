@@ -2,7 +2,7 @@ import streamlit as st
 import requests
 import numpy as np
 
-st.title("LLM based article summary")
+st.title("LLM bases article search")
 
 # Initialize chat history
 if "messages" not in st.session_state:
