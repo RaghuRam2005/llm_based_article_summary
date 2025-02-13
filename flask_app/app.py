@@ -1,5 +1,6 @@
 from flask import Flask, request, jsonify
 import utils
+import numpy as np
 
 app = Flask(__name__)
 
@@ -37,9 +38,24 @@ def query():
     print("Step 3: Generating answer")
     response = utils.generate_answer(content=content, query=query, history=history)
     if not response:
-        return jsonify({'error': 'Failed to generate a response'}), 500    
+        return jsonify({'answer': 'Failed to generate a response'}), 500    
 
-    return jsonify({'response': response})
+    return jsonify({'answer': response})
+
+@app.route("/embed", methods=['POST'])
+def get_embed():
+    data = request.json
+    data = data['query']
+    embedding = utils.get_embeddings(data)
+    return jsonify({'embedding':embedding.tolist()})
+
+@app.route("/check", methods=['POST'])
+def is_same():
+    data = request.json
+    query_embed = np.array(data['query'])
+    other_embed = np.array(data['embedding'])
+    check = utils.is_similar(query_embed, other_embed)
+    return jsonify({'similar':check})
 
 if __name__ == '__main__':
     app.run(host='localhost', port=5001, debug="enable")
